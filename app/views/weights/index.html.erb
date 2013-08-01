@@ -1,0 +1,42 @@
+<div class="row">
+  <div id="table-container" class="span6">
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Weight</th>
+          <th>Body Fat</th>
+          <th>Lean Mass</th>
+          <th>Fat Mass</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @weights.reverse.each do |weight| %>
+          <tr>
+            <td><%= weight.time.strftime('%b %e %H:%M') %></td>
+            <td><%= weight.weight %></td>
+            <td><%= weight.fat_percent %></td>
+            <td><%= weight.lean_mass %></td>
+            <td><%= weight.fat_mass %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+  <div id="graphs-container" class="span6">
+    <dl>
+      <dt>Last Update</dt>
+      <dd><%= @last_update.strftime('%H:%M') %></dd>
+    </dl>
+    <div class="btn-group">
+      <a class="btn" href="<%= clear_cache_weights_path %>"><i class="icon-refresh"></i> Update from FitBit</a>
+      <a class="btn" href="<%= weights_url :format => 'csv' %>"><i class="icon-download"></i> Download CSV</a>
+      <a class="btn" href="<%= logout_path %>"><i class="icon-stop"></i> Logout</a>
+    </div>
+    <% @chart_titles = { :weight => 'Weight', :fat_percent => 'Body Fat %', :lean_mass => 'Lean Mass', :fat_mass => 'Fat Mass'} %>
+    <% [:fat_percent, :fat_mass, :lean_mass, :weight].each do |attr| %>
+        <%= content_tag :div, :id => "#{attr}_chart", :class => 'highchart-scatterline chart',
+          :data => { :title => "#{@chart_titles[attr]} (#{format_per_day @series[attr][:per_day]})", :weights => @series[attr] } {} %>
+    <% end %>
+  </div>
+</div>
