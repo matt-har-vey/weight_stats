@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
   end
 
   def authorized?
-    !session[:access_token].nil?
+    !session[:access_token].nil? && !session[:fitbit_id].nil?
   end
 
   def authorize(next_url)

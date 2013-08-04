@@ -11,11 +11,13 @@ class Weight
     end
   end
 
-  def self.all(access_token)
+  def self.all(options)
     all_weights = []
 
-    start_date = 3.months.ago.to_date
-    end_date = 2.days.from_now.to_date
+    access_token = options[:access_token]
+    start_date = options[:start_date] || 3.months.ago.to_date
+    end_date = options[:end_date] || 2.days.from_now.to_date
+
 		fetch_start = start_date
 		fetch_end = start_date.next_month
 

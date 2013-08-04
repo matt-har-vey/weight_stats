@@ -1,0 +1,13 @@
+<%= form_for(@user) do |f| %>
+  <fieldset>
+    <div class="form-group">
+      <%= f.label :weights_start, 'Start date:' %>
+      <%= f.text_field :weights_start %>
+    </div>
+    <div class="form-group">
+      <%= f.label :weights_end, 'End date:' %>
+      <%= f.text_field :weights_end %>
+    </div>
+    <%= f.submit 'Update' %>
+  </fieldset>
+<% end %>

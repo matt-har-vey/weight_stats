@@ -5,14 +5,17 @@ class WeightsController < ApplicationController
   RefreshInterval = 20.minutes
 
   def index
+    if !authorized?
+      return authorize weights_url
+    end
+
     if session[:weights] && session[:weights_time] && session[:weights_time] > RefreshInterval.ago
       @weights = session[:weights]
-    elsif authorized?
-      @weights = Weight.all(session[:access_token])
+    else
+      user = User.where(fitbit_id: session[:fitbit_id]).first
+      @weights = Weight.all(access_token: session[:access_token], start_date: user.weights_start, end_date: user.weights_end)
       session[:weights] = @weights
       session[:weights_time] = Time.now
-    else
-      return authorize weights_url
     end
 
     @last_update = session[:weights_time]
