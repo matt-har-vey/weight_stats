@@ -12,6 +12,10 @@ module FitBit
   class BadHTTPStatus < Exception
   end
 
+  def self.access_token(token, secret)
+    OAuth::AccessToken.new(CONSUMER, token, secret)
+  end
+
   def self.get_json(access_token, path)
     res = access_token.get(path, 'Accept-Language' => 'en_US')
     if res.is_a? Net::HTTPOK

@@ -9,19 +9,14 @@ class WeightsController < ApplicationController
       return authorize weights_url
     end
 
-    if session[:weights] && session[:weights_time] && session[:weights_time] > RefreshInterval.ago
-      @weights = session[:weights]
-    else
-      user = User.where(fitbit_id: session[:fitbit_id]).first
-      @weights = Weight.all(access_token: session[:access_token], start_date: user.weights_start, end_date: user.weights_end)
-      session[:weights] = @weights
-      session[:weights_time] = Time.now
-    end
+    user.update_weights_if_stale!
+    @last_update = user.weights_updated_at
+    @weights = user.weights_in_range
 
-    @last_update = session[:weights_time]
-    expires_in RefreshInterval - (Time.now - @last_update)
+    stale_time = user.updated_at > @last_update ? user.updated_at : @last_update
+    if stale?(last_modified: stale_time)
+      expires_in User::WeightsRefreshInterval - (Time.now - @last_update)
 
-    if stale?(last_modified: @last_update)
       @series = {}
       time_fun = lambda { |w| w.time.to_i }
       [:fat_percent, :weight, :fat_mass, :lean_mass ].each do |attr|
@@ -59,8 +54,7 @@ class WeightsController < ApplicationController
   end
 
   def clear_cache
-    session[:weights] = nil
-    session[:weights_time] = nil
+    user.update_weights!
     redirect_to weights_url
   end
 end
