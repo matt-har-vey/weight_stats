@@ -29,9 +29,9 @@
       <dd><%= @last_update.strftime('%H:%M') %></dd>
     </dl>
     <div class="btn-group">
-      <a class="btn" href="<%= clear_cache_weights_path %>"><i class="icon-refresh"></i> Update from FitBit</a>
-      <a class="btn" href="<%= weights_url :format => 'csv' %>"><i class="icon-download"></i> CSV</a>
-      <a class="btn" href="<%= edit_user_url session[:user_id] %>"><i class="icon-calendar"></i> Dates</a>
+      <a class="btn" href="<%= force_update_user_weights_path @user %>"><i class="icon-refresh"></i> Update from FitBit</a>
+      <a class="btn" href="<%= user_weights_url @user, :format => 'csv' %>"><i class="icon-download"></i> CSV</a>
+      <a class="btn" href="<%= edit_user_url @user %>"><i class="icon-calendar"></i> Dates</a>
       <a class="btn" href="<%= logout_path %>"><i class="icon-stop"></i> Logout</a>
     </div>
     <% @chart_titles = { :weight => 'Weight', :fat_percent => 'Body Fat %', :lean_mass => 'Lean Mass', :fat_mass => 'Fat Mass'} %>

@@ -30,13 +30,13 @@ class User < ActiveRecord::Base
     super nil_blank(s)
   end
 
-  def weights_in_range
-    if weights_start && weights_end
-      weights.where("time >= ? and time <= ?", weights_start.to_time, weights_end.to_time)
-    elsif weights_start
-      weights.where("time >= ?", weights_start.to_time)
-    elsif weights_end
-      weights.where("time <= ?", weights_end.to_time)
+  def weights_in_range(s = weights_start, e = weights_end)
+    if s && e
+      weights.where("time >= ? and time <= ?", s.to_time, e.to_time)
+    elsif s
+      weights.where("time >= ?", s.to_time)
+    elsif e
+      weights.where("time <= ?", e.to_time)
     else
       weights
     end
@@ -89,13 +89,16 @@ class User < ActiveRecord::Base
 		times = []
 		weights = {}
 		fats = {}
+    log_ids = {}
 
 		loop do
       wj = FitBit.get_json access_token, "/1/user/-/body/log/weight/date/#{fetch_start}/#{fetch_end}.json"
 			if wj && wj['weight']
 				wj['weight'].each do |d|
-					times << time(d)
-					weights[time(d)] = d['weight']
+          time = time(d)
+					times << time
+					weights[time] = d['weight']
+          log_ids[time] = d['logId']
 				end
 			end
 
@@ -120,6 +123,7 @@ class User < ActiveRecord::Base
       w.time = s
       w.weight = weights[s]
       w.fat_percent = fats[s]
+      w.log_id = log_ids[s]
 
       if w.weight && w.fat_percent
         fitbit_weights << w

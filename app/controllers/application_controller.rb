@@ -3,7 +3,7 @@ class ApplicationController < ActionController::Base
 
   protect_from_forgery
 
-  before_filter :set_csp, :set_time_zone
+  before_filter :set_csp, :set_time_zone, :user_required
 
   private
     def set_csp
@@ -14,18 +14,21 @@ class ApplicationController < ActionController::Base
       Time.zone = 'Pacific Time (US & Canada)'
     end
 
+    def user_required
+      unless authorized?
+        reset_session
+        authorize
+        false
+      end
+    end
+
     def authorized?
       !session[:user_id].nil?
     end
 
-    def authorize(next_url)
+    def authorize
       request_token = FitBit::CONSUMER.get_request_token(:oauth_callback => auth_url)
-      flash[:next_url] = next_url
       flash[:request_token] = request_token
       redirect_to request_token.authorize_url
-    end
-
-    def user
-      @user ||= (session[:user_id] && User.find(session[:user_id]))
     end
 end

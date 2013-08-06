@@ -2,34 +2,17 @@ require 'csv'
 require 'stat_functions'
 
 class WeightsController < ApplicationController
-  RefreshInterval = 20.minutes
+  before_filter :find_user
 
   def index
-    if !authorized?
-      return authorize weights_url
-    end
+    @user.update_weights_if_stale!
+    @last_update = @user.weights_updated_at
 
-    user.update_weights_if_stale!
-    @last_update = user.weights_updated_at
-    @weights = user.weights_in_range
-
-    stale_time = user.updated_at > @last_update ? user.updated_at : @last_update
+    stale_time = @user.updated_at > @last_update ? @user.updated_at : @last_update
     if stale?(last_modified: stale_time)
-      expires_in User::WeightsRefreshInterval - (Time.now - @last_update)
 
-      @series = {}
-      time_fun = lambda { |w| w.time.to_i }
-      [:fat_percent, :weight, :fat_mass, :lean_mass ].each do |attr|
-        fit_unscaled = StatFunctions.map_and_fit(@weights, time_fun, lambda { |w| w.send(attr) })
-
-        # Scaling by 1000 (seconds to milliseconds) for highcarts dates
-        @series[attr] =
-          { :data => @weights.select { |w| !w.send(attr).nil? }.map { |w| [ w.time.to_i * 1000, w.send(attr) ] },
-            :fit => { :coeff => [ fit_unscaled[:coeff][0], fit_unscaled[:coeff][1] / 1000],
-                      :endpoints => fit_unscaled[:endpoints].map { |p| [ 1000 * p[0], p[1]] },
-                      :rmse => fit_unscaled[:rmse] },
-            :per_day => fit_unscaled[:coeff][1] * 3600 * 24 }
-      end
+      @weights = @user.weights_in_range
+      @series = series(@weights)
 
       respond_to do |format|
         format.html do
@@ -53,8 +36,32 @@ class WeightsController < ApplicationController
     end
   end
 
-  def clear_cache
-    user.update_weights!
-    redirect_to weights_url
+  def force_update
+    @user.update_weights!
+    redirect_to user_weights_url(@user)
   end
+
+  private
+    def find_user
+      @user = User.find(params[:user_id])
+    end
+
+    def series(weights)
+      series = {}
+      time_fun = lambda { |w| w.time.to_i }
+
+      [:fat_percent, :weight, :fat_mass, :lean_mass ].each do |attr|
+        fit_unscaled = StatFunctions.map_and_fit(weights, time_fun, lambda { |w| w.send(attr) })
+
+        # Scaling by 1000 (seconds to milliseconds) for highcarts dates
+        series[attr] =
+          { :data => weights.select { |w| !w.send(attr).nil? }.map { |w| [ w.time.to_i * 1000, w.send(attr) ] },
+            :fit => { :coeff => [ fit_unscaled[:coeff][0], fit_unscaled[:coeff][1] / 1000],
+                      :endpoints => fit_unscaled[:endpoints].map { |p| [ 1000 * p[0], p[1]] },
+                      :rmse => fit_unscaled[:rmse] },
+            :per_day => fit_unscaled[:coeff][1] * 3600 * 24 }
+      end
+
+      series
+    end
 end

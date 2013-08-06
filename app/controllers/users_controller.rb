@@ -1,14 +1,17 @@
 class UsersController < ApplicationController
   before_filter :set_user, only: [:show, :edit, :update, :destroy]
 
+  def home
+    redirect_to user_weights_path(session[:user_id])
+  end
+
   def edit
   end
 
   def update
     respond_to do |format|
       if @user.update_attributes(user_params)
-        session[:weights] = nil
-        format.html { redirect_to :weights, notice: 'User was successfully updated.' }
+        format.html { redirect_to user_weights_url(@user), notice: 'User was successfully updated.' }
         format.json { head :no_content }
       else
         format.html { render action: 'edit' }
