@@ -4,11 +4,11 @@
     <fieldset>
       <div class="form-group">
         <%= f.label :weights_start, 'Start:' %>
-        <%= f.text_field :weights_start %>
+        <%= f.text_field :weights_start, class: 'datepicker' %>
       </div>
       <div class="form-group">
         <%= f.label :weights_end, 'End:' %>
-        <%= f.text_field :weights_end %>
+        <%= f.text_field :weights_end, class: 'datepicker' %>
       </div>
       <%= f.submit 'Update' %>
     </fieldset>

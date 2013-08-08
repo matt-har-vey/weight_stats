@@ -15,6 +15,8 @@
       year: '%Y'
     };
 
+    $('.datepicker').datepicker({autoclose: true, format: 'yyyy-mm-dd', clearBtn: true});
+
     $('.highchart-scatterline').each(function() {
       var chartDiv = $(this);
       var title = chartDiv.data('title');
