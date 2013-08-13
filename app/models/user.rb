@@ -42,6 +42,28 @@ class User < ActiveRecord::Base
     end
   end
 
+  def averages_in_range(s = weights_start, e = weights_end)
+    weights = weights_in_range(s,e)
+
+    by_day = {}
+
+    weights.each do |weight|
+      day = weight.time.to_date
+      by_day[day] = [] if by_day[day].nil?
+      by_day[day] << weight
+    end
+
+    by_day.map do |k,v|
+      n = v.size
+      average = Weight.new
+      average.user = self
+      average.time = k.to_time
+      average.weight = round_hundredths(v.inject(0) { |s,w| s + w.weight } / n.to_f)
+      average.fat_percent = round_hundredths(v.inject(0) { |s,w| s + w.fat_percent } / n.to_f)
+      average
+    end
+  end
+
   def update_weights_if_stale!
     if !weights_updated_at || weights_updated_at < WeightsRefreshInterval.ago
       update_weights!
@@ -152,5 +174,9 @@ class User < ActiveRecord::Base
 
     def self.user_json(access_token)
       FitBit.get_json(access_token, "/1/user/-/profile.json")['user']
+    end
+
+    def round_hundredths(f)
+      (f * 100).to_int.to_f / 100.0
     end
 end

@@ -11,7 +11,7 @@ class WeightsController < ApplicationController
     stale_time = @user.updated_at > @last_update ? @user.updated_at : @last_update
     if stale?(last_modified: stale_time)
 
-      @weights = @user.weights_in_range
+      @weights = params[:average] ? @user.averages_in_range : @user.weights_in_range
       @series = series(@weights)
 
       respond_to do |format|
