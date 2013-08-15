@@ -10,8 +10,7 @@ class Weight < ActiveRecord::Base
   end
 
   def fitbit_destroy
-    FitBit.delete_json user.access_token, "/1/user/-/body/log/weight/#{log_id}.json"
-    FitBit.delete_json user.access_token, "/1/user/-/body/log/fat/#{log_id}.json"
+    user.fitbit.delete_weight log_id
     destroy
   end
 end

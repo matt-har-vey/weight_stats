@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
     end
 
     def authorize
-      request_token = FitBit::CONSUMER.get_request_token(:oauth_callback => auth_url)
+      request_token = Fitbit::CONSUMER.get_request_token(:oauth_callback => auth_url)
       flash[:request_token] = request_token
       redirect_to request_token.authorize_url
     end
