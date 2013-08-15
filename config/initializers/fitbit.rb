@@ -12,14 +12,33 @@ module FitBit
   class BadHTTPStatus < Exception
   end
 
+  class NotFound < Exception
+  end
+
   def self.access_token(token, secret)
     OAuth::AccessToken.new(CONSUMER, token, secret)
   end
 
   def self.get_json(access_token, path)
-    res = access_token.get(path, 'Accept-Language' => 'en_US')
+    request :get, access_token, path
+  end
+
+  def self.delete_json(access_token, path)
+    begin
+      request :delete, access_token, path
+    rescue NotFound
+      nil
+    end
+  end
+
+  def self.request(method, access_token, path)
+    res = access_token.request(method, path, 'Accept-Language' => 'en_US')
     if res.is_a? Net::HTTPOK
       JSON.parse(res.body)
+    elsif res.is_a? Net::HTTPNoContent
+      nil
+    elsif res.is_a? Net::HTTPNotFound
+      raise NotFound
     elsif res.is_a? Net::HTTPUnauthorized
       raise BadToken
     else
