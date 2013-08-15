@@ -44,18 +44,31 @@ class User < ActiveRecord::Base
     end
   end
 
-  def averages_in_range(s = weights_start, e = weights_end)
-    weights = weights_in_range(s,e)
+  def averages_in_range(options = {})
+    s = options[:start] || weights_start
+    e = options[:end] || weights_end
+    level = options[:level] || :daily
 
-    by_day = {}
-
-    weights.each do |weight|
-      day = weight.time.to_date
-      by_day[day] = [] if by_day[day].nil?
-      by_day[day] << weight
+    keyer = nil
+    if level == :daily
+      keyer = ->(t) { t.beginning_of_day }
+    elsif level == :weekly
+      keyer = ->(t) { t.beginning_of_week }
+    else
+      raise ArgumentError.new('unknown aggregation level')
     end
 
-    by_day.map do |k,v|
+    weights = weights_in_range(s,e)
+
+    grouped = {}
+
+    weights.each do |weight|
+      group = keyer.call(weight.time)
+      grouped[group] = [] if grouped[group].nil?
+      grouped[group] << weight
+    end
+
+    grouped.map do |k,v|
       n = v.size
       average = Weight.new
       average.user = self
