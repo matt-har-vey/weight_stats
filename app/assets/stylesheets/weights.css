@@ -1,3 +1,5 @@
 div.chart { margin-bottom: 20px; }
 div#table-container { margin-left: 0; }
 div.button-row { margin-bottom: 10px; }
+.weight-delete { display: none; }
+form.button_to { margin: 0; }

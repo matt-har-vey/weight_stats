@@ -10,10 +10,10 @@ class WeightsController < ApplicationController
 
     stale_time = @user.updated_at > @last_update ? @user.updated_at : @last_update
     if stale?(last_modified: stale_time)
-      aggregation_level = params[:aggregate] && params[:aggregate].to_sym
+      @aggregation_level = params[:aggregate] && params[:aggregate].to_sym
 
-      @weights = aggregation_level ?
-                   @user.averages_in_range(level: aggregation_level)
+      @weights = @aggregation_level ?
+                   @user.averages_in_range(level: @aggregation_level)
                  : @user.weights_in_range
 
       @series = series(@weights)
@@ -43,6 +43,15 @@ class WeightsController < ApplicationController
   def force_update
     @user.update_weights!
     redirect_to user_weights_url(@user)
+  end
+
+  def destroy
+    @weight = Weight.find(params[:id])
+    @weight.fitbit_destroy
+    user = @weight.user
+    user.weights_updated_at = Time.now
+    user.save!
+    redirect_to user_weights_url(user)
   end
 
   private

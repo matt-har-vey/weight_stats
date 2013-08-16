@@ -17,6 +17,8 @@
 
     $('.datepicker').datepicker({autoclose: true, format: 'yyyy-mm-dd', clearBtn: true});
 
+    $('.arm-delete').click(function() { $('.weight-delete').toggle(); return false; });
+
     $('.highchart-scatterline').each(function() {
       var chartDiv = $(this);
       var title = chartDiv.data('title');

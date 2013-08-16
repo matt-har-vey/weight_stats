@@ -13,7 +13,12 @@
       <tbody>
         <% @weights.reverse.each do |weight| %>
           <tr>
-            <td><%= weight.time.strftime('%b %e %H:%M') %></td>
+            <td>
+              <div><%= weight.time.strftime('%b %e %H:%M') %></div>
+              <% unless weight.log_id.blank? %>
+                <div class="weight-delete"><%= button_to 'Delete', user_weight_path(@user, weight), method: :delete, class: 'btn btn-mini' %></div>
+              <% end %>
+            </td>
             <td><%= weight.weight %></td>
             <td><%= weight.fat_percent %></td>
             <td><%= weight.lean_mass %></td>
@@ -31,9 +36,14 @@
     <div class="button-row">
       <div class="btn-group">
         <a class="btn" href="<%= force_update_user_weights_path @user %>"><i class="icon-refresh"></i> Update from FitBit</a>
+        <a class="btn" href="<%= logout_path %>"><i class="icon-stop"></i> Logout</a>
+      </div>
+    </div>
+    <div class="button-row">
+      <div class="btn-group">
         <a class="btn" href="<%= user_weights_url @user, :format => 'csv' %>"><i class="icon-download"></i> CSV</a>
         <a class="btn" href="<%= edit_user_url @user %>"><i class="icon-calendar"></i> Dates</a>
-        <a class="btn" href="<%= logout_path %>"><i class="icon-stop"></i> Logout</a>
+        <% unless @aggregation_level %><a href="#" class="btn arm-delete"><i class="icon-remove"></i> Delete</a><% end %>
       </div>
     </div>
     <div class="button-row">
