@@ -5,12 +5,14 @@ class WeightsController < ApplicationController
   before_filter :find_user
 
   def index
+    @aggregation_level = params[:aggregate] && params[:aggregate].to_sym
+    View.async_create(@user, session[:user_id], @aggregation_level)
+
     @user.update_weights_if_stale!
     @last_update = @user.weights_updated_at
 
     stale_time = @user.updated_at > @last_update ? @user.updated_at : @last_update
     if stale?(last_modified: stale_time)
-      @aggregation_level = params[:aggregate] && params[:aggregate].to_sym
 
       @weights = @aggregation_level ?
                    @user.averages_in_range(level: @aggregation_level)
@@ -34,7 +36,7 @@ class WeightsController < ApplicationController
             :disposition => 'attachment; filename=weights.csv'
         end
         format.json do
-          render  :json => @series
+          render :json => @series
         end
       end
     end
