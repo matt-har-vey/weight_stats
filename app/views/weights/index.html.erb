@@ -1,3 +1,4 @@
+<% date_format = @aggregation_level ? '%b %e' : '%b %e %H:%M' %>
 <div class="row">
   <div id="table-container" class="span6">
     <table class="table table-striped">
@@ -14,7 +15,7 @@
         <% @weights.reverse.each do |weight| %>
           <tr>
             <td>
-              <div><%= weight.time.strftime('%b %e %H:%M') %></div>
+              <div><%= weight.time.strftime(date_format) %></div>
               <% unless weight.log_id.blank? %>
                 <div class="weight-delete"><%= button_to 'Delete', user_weight_path(@user, weight), method: :delete, class: 'btn btn-mini' %></div>
               <% end %>
