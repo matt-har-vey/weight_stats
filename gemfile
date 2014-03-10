@@ -8,7 +8,7 @@ gem 'rails'
 gem 'sqlite3'
 gem 'oauth'
 gem 'thin'
-gem 'memcache'
+# gem 'memcache'
 
 gem 'therubyracer'
 gem 'less-rails'
